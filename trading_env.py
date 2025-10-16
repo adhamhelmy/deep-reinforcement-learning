@@ -25,6 +25,7 @@ SOFTWARE.
 
 import logging
 import tempfile
+import os
 
 import gymnasium
 import numpy as np
@@ -71,14 +72,26 @@ class DataSource:
     def load_data(self):
         log.info('loading data for {}...'.format(self.ticker))
         idx = pd.IndexSlice
-        with pd.HDFStore('data/assets.h5') as store:
-            df = (store['quandl/wiki/prices']
-                  .loc[idx[:, self.ticker],
-                       ['adj_close', 'adj_volume', 'adj_low', 'adj_high']]
-                  .dropna()
-                  .sort_index())
-        df.columns = ['close', 'volume', 'low', 'high']
-        log.info('got data for {}...'.format(self.ticker))
+        if os.path.exists('data/asets.h5'):
+            with pd.HDFStore('data/asets.h5') as store:
+                df = (store['quandl/wiki/prices']
+                    .loc[idx[:, self.ticker],
+                        ['adj_close', 'adj_volume', 'adj_low', 'adj_high']]
+                    .dropna()
+                    .sort_index())
+            df.columns = ['close', 'volume', 'low', 'high']
+            log.info('got data for {}...'.format(self.ticker))
+            log.info(df)
+            df.to_csv(f'data/df/v1/{self.ticker}_data.csv', index=True)
+        else: 
+                csv_file_path = f'data/df/v1/{self.ticker}_data.csv'
+                if os.path.exists(csv_file_path):
+                    df = pd.read_csv(csv_file_path, index_col=[0, 1], parse_dates=[0] )
+                    if df.empty:
+                        raise ValueError('No data found in CSV for {}'.format(self.ticker))
+                else:
+                    raise FileNotFoundError('CSV file not found for {}'.format(self.ticker))
+
         return df
 
     def preprocess_data(self):
