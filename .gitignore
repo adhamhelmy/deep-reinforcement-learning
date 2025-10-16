@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+*.h5
+*.npy
+data/List of S&P 500 companies - Wikipedia_files/
+data/wiki_prices.csv
